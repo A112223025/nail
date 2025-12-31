@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>n2_nail_studio | 預約系統</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500&display=swap');
+
+        :root {
+            --milk-tea: #D5BDAF;
+            --cream: #F5EBE0;
+            --mocha: #8E7D71;
+            --latte: #E3D5CA;
+            --dark-mocha: #463F3A;
+        }
+
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: var(--cream);
+            color: var(--dark-mocha);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .booking-container {
+            width: 100%;
+            max-width: 420px;
+            background: #ffffff;
+            border-radius: 30px;
+            box-shadow: 0 20px 40px rgba(70, 63, 58, 0.1);
+            overflow: hidden;
+            margin: 15px;
+        }
+
+        .step-content {
+            padding: 30px 20px;
+            display: none;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .step-content.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .btn-primary {
+            background-color: var(--milk-tea);
+            color: white;
+            width: 100%;
+            padding: 14px;
+            border-radius: 12px;
+            font-weight: 500;
+            transition: 0.3s;
+            text-align: center;
+            display: block;
+            margin-top: 20px;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--mocha);
+        }
+
+        .btn-line {
+            background-color: #06C755;
+            color: white;
+            width: 100%;
+            padding: 14px;
+            border-radius: 12px;
+            font-weight: 500;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 15px;
+            text-decoration: none;
+        }
+
+        .option-card {
+            border: 1px solid var(--latte);
+            border-radius: 12px;
+            padding: 14px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .option-card:hover, .option-card.selected {
+            background-color: var(--cream);
+            border-color: var(--milk-tea);
+        }
+
+        .progress-bar {
+            height: 4px;
+            background: var(--cream);
+            position: relative;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--milk-tea);
+            width: 20%;
+            transition: 0.5s;
+        }
+
+        .header-section {
+            background-color: var(--latte);
+            padding: 30px 20px;
+            text-align: center;
+        }
+
+        .header-section h1 {
+            font-size: 1.5rem;
+            letter-spacing: 2px;
+            color: var(--mocha);
+            margin: 0;
+            font-weight: 500;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--latte);
+            border-radius: 10px;
+            margin-top: 8px;
+            outline: none;
+            background: #fff;
+        }
+
+        .section-title {
+            font-size: 0.75rem;
+            font-weight: bold;
+            color: var(--mocha);
+            margin: 15px 0 8px 5px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px dashed var(--latte);
+        }
+    </style>
+</head>
+<body>
+
+<div class="booking-container">
+    <div class="header-section">
+        <h1>n2_nail_studio</h1>
+        <p class="text-[10px] mt-2 opacity-60 uppercase tracking-widest">Nail Art & Care Service</p>
+    </div>
+    
+    <div class="progress-bar">
+        <div class="progress-fill" id="progressFill"></div>
+    </div>
+
+    <!-- 步驟 1: 資料 -->
+    <div class="step-content active" id="step1">
+        <h2 class="text-xl mb-4 font-medium text-center">預約資料填寫</h2>
+        <div class="space-y-4">
+            <div>
+                <label class="text-xs font-medium text-gray-500">姓名 / 稱呼</label>
+                <input type="text" id="userName" placeholder="如何稱呼您？">
+            </div>
+            <div>
+                <label class="text-xs font-medium text-gray-500">手機號碼</label>
+                <input type="tel" id="userPhone" placeholder="聯繫手機">
+            </div>
+            <button class="btn-primary" onclick="goToStep(2, 40)">下一步</button>
+        </div>
+    </div>
+
+    <!-- 步驟 2: 日期 -->
+    <div class="step-content" id="step2">
+        <h2 class="text-xl mb-4 font-medium text-center">選擇預約日期</h2>
+        <div class="space-y-4">
+            <div>
+                <label class="text-xs font-medium text-gray-500">日期 (不可選今天之前)</label>
+                <input type="date" id="bookDate">
+            </div>
+            <div>
+                <label class="text-xs font-medium text-gray-500">時段</label>
+                <select id="bookTime">
+                    <option value="">請選擇時段</option>
+                    <option value="11:00">11:00</option>
+                    <option value="13:30">13:30</option>
+                    <option value="16:00">16:00</option>
+                    <option value="18:30">18:30</option>
+                    <option value="20:00">20:00</option>
+                </select>
+            </div>
+            <button class="btn-primary" onclick="goToStep(3, 60)">確認時段</button>
+            <p class="text-center text-xs mt-4 text-gray-400 cursor-pointer" onclick="goToStep(1, 20)">返回上一步</p>
+        </div>
+    </div>
+
+    <!-- 步驟 3: 卸甲 -->
+    <div class="step-content" id="step3">
+        <h2 class="text-xl mb-4 font-medium text-center">卸甲需求</h2>
+        <div class="space-y-2">
+            <p class="section-title">搭配續作項目</p>
+            <div class="option-card" onclick="handleRemoval('本店卸甲續作', 'NT$ 200')">
+                <span>本店卸甲續作</span>
+                <span class="text-xs text-gray-400">+ NT$ 200</span>
+            </div>
+            <div class="option-card" onclick="handleRemoval('他店卸甲續作', 'NT$ 300')">
+                <span>他店卸甲續作</span>
+                <span class="text-xs text-gray-400">+ NT$ 300</span>
+            </div>
+            <div class="option-card" onclick="handleRemoval('不卸甲', 'NT$ 0')">
+                <span>不卸甲直接施作</span>
+                <span class="text-xs text-gray-400">+ NT$ 0</span>
+            </div>
+            <p class="section-title">單純卸甲服務</p>
+            <div class="option-card" onclick="handleRemoval('「僅」本店卸甲', 'NT$ 400', true)">
+                <span>「僅」本店卸甲 (含保養)</span>
+                <span class="text-xs text-gray-400">NT$ 400</span>
+            </div>
+            <div class="option-card" onclick="handleRemoval('「僅」他店卸甲', 'NT$ 500', true)">
+                <span>「僅」他店卸甲 (含保養)</span>
+                <span class="text-xs text-gray-400">NT$ 500</span>
+            </div>
+        </div>
+        <p class="text-center text-xs mt-4 text-gray-400 cursor-pointer" onclick="goToStep(2, 40)">返回上一步</p>
+    </div>
+
+    <!-- 步驟 4: 服務項目 -->
+    <div class="step-content" id="step4">
+        <h2 class="text-xl mb-1 font-medium text-center">服務項目</h2>
+        <p class="text-xs text-gray-400 mb-4 text-center">請選擇施作款式</p>
+        
+        <div class="space-y-1">
+            <p class="section-title">基礎系列</p>
+            <div class="option-card" onclick="handleStyle('單色', 'NT$ 700')">
+                <span class="text-sm">單色</span>
+                <span class="text-xs">NT$ 700</span>
+            </div>
+            <div class="option-card" onclick="handleStyle('跳色', 'NT$ 800')">
+                <div>
+                    <p class="text-sm">跳色</p>
+                    <p class="text-[10px] text-gray-400">可跳一色 / 多一色 +50</p>
+                </div>
+                <span class="text-xs">NT$ 800</span>
+            </div>
+            <div class="option-card" onclick="handleStyle('貓眼/極光/璀璨', 'NT$ 800')">
+                <div>
+                    <p class="text-sm">貓眼 / 極光 / 璀璨</p>
+                    <p class="text-[10px] text-gray-400">跳一色 +100</p>
+                </div>
+                <span class="text-xs">NT$ 800</span>
+            </div>
+            <div class="option-card" onclick="handleStyle('經典法式', 'NT$ 900')">
+                <span class="text-sm">經典法式</span>
+                <span class="text-xs">NT$ 900</span>
+            </div>
+
+            <p class="section-title">造型系列 (依複雜度報價)</p>
+            <div class="option-card" onclick="handleStyle('造型設計 (低)', 'NT$ 1100')">
+                <span class="text-sm">造型設計 (低)</span>
+                <span class="text-xs">NT$ 1100</span>
+            </div>
+            <div class="option-card" onclick="handleStyle('造型設計 (中)', 'NT$ 1200')">
+                <span class="text-sm">造型設計 (中)</span>
+                <span class="text-xs">NT$ 1200</span>
+            </div>
+            <div class="option-card" onclick="handleStyle('造型設計 (高)', 'NT$ 1300')">
+                <span class="text-sm">造型設計 (高)</span>
+                <span class="text-xs">NT$ 1300</span>
+            </div>
+            <div class="option-card" onclick="handleStyle('不挑款設計 (美甲師發揮)', 'NT$ 1400↑')">
+                <span class="text-sm">不挑款設計</span>
+                <span class="text-xs">NT$ 1400↑</span>
+            </div>
+            <div class="option-card" onclick="handleStyle('帶圖施工 (請私訊報價)', 'NT$ 1500↑')">
+                <span class="text-sm">帶圖施工</span>
+                <span class="text-xs">NT$ 1500↑</span>
+            </div>
+        </div>
+        <p class="text-center text-xs mt-6 text-gray-400 cursor-pointer" onclick="goToStep(3, 60)">返回上一步</p>
+    </div>
+
+    <!-- 步驟 5: 結算明細 -->
+    <div class="step-content" id="step5">
+        <h2 class="text-xl font-medium mb-4 text-center">預約明細確認</h2>
+        
+        <div class="bg-[#FAF7F2] p-5 rounded-2xl border border-[#F0E6D8] space-y-3 mb-6" id="summaryList">
+            <!-- 由 JS 動態生成 -->
+        </div>
+
+        <p class="text-sm text-gray-500 px-4 mb-6 text-center leading-relaxed">確認無誤後請發送至 LINE<br>美甲師確認時段後即預約成功！</p>
+        
+        <a id="lineLink" href="#" target="_blank" class="btn-line">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/4/41/LINE_logo.svg" width="22" alt="LINE">
+            發送預約明細至 LINE
+        </a>
+
+        <div class="mt-8 p-4 bg-gray-50 rounded-2xl text-left border border-gray-100">
+            <p class="text-xs font-bold text-[#8E7D71]">n2_nail_studio 資訊：</p>
+            <ul class="text-[11px] text-[#A69080] mt-2 list-disc pl-4 space-y-1">
+                <li>地址：台南市安南區安和路五段396號</li>
+                <li>備註：保留 15 分鐘，逾時請提前告知。</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 設定日期選擇器最小值為今天
+    window.onload = function() {
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('bookDate').setAttribute('min', today);
+    };
+
+    let bookingData = {
+        name: '', phone: '', date: '', time: '', removal: '', removalPrice: '', style: '', stylePrice: ''
+    };
+
+    function goToStep(stepNumber, progressWidth) {
+        if (stepNumber === 2) {
+            bookingData.name = document.getElementById('userName').value;
+            bookingData.phone = document.getElementById('userPhone').value;
+            if(!bookingData.name || !bookingData.phone) { alert('請填寫完整聯繫資料'); return; }
+        }
+        if (stepNumber === 3) {
+            bookingData.date = document.getElementById('bookDate').value;
+            bookingData.time = document.getElementById('bookTime').value;
+            if(!bookingData.date || !bookingData.time) { alert('請選擇日期與時段'); return; }
+        }
+
+        document.querySelectorAll('.step-content').forEach(s => s.classList.remove('active'));
+        document.getElementById('step' + stepNumber).classList.add('active');
+        document.getElementById('progressFill').style.width = progressWidth + '%';
+        window.scrollTo(0, 0);
+
+        if (stepNumber === 5) renderSummary();
+    }
+
+    function handleRemoval(text, price, isOnlyRemoval = false) {
+        bookingData.removal = text;
+        bookingData.removalPrice = price;
+        if (isOnlyRemoval) { 
+            bookingData.style = '僅卸甲保養'; 
+            bookingData.stylePrice = price;
+            goToStep(5, 100); 
+        } 
+        else { goToStep(4, 80); }
+    }
+
+    function handleStyle(text, price) {
+        bookingData.style = text;
+        bookingData.stylePrice = price;
+        goToStep(5, 100);
+    }
+
+    function renderSummary() {
+        const summaryDiv = document.getElementById('summaryList');
+        const items = [
+            { label: '預約姓名', value: bookingData.name },
+            { label: '聯繫電話', value: bookingData.phone },
+            { label: '預約日期', value: bookingData.date },
+            { label: '預約時段', value: bookingData.time },
+            { label: '卸甲需求', value: bookingData.removal + ' (' + bookingData.removalPrice + ')' },
+            { label: '施作款式', value: bookingData.style + ' (' + bookingData.stylePrice + ')' }
+        ];
+
+        summaryDiv.innerHTML = items.map(item => `
+            <div class="summary-item">
+                <span class="text-xs text-gray-400">${item.label}</span>
+                <span class="text-sm font-medium">${item.value}</span>
+            </div>
+        `).join('');
+
+        generateLineLink();
+    }
+
+    function generateLineLink() {
+        const message = `你好！我要預約 n2_nail_studio：\n\n` +
+                        `👤 姓名：${bookingData.name}\n` +
+                        `📞 電話：${bookingData.phone}\n` +
+                        `📅 日期：${bookingData.date}\n` +
+                        `⏰ 時段：${bookingData.time}\n` +
+                        `✨ 卸甲：${bookingData.removal} (${bookingData.removalPrice})\n` +
+                        `🎨 款式：${bookingData.style} (${bookingData.stylePrice})\n\n` +
+                        `請幫我確認時段，謝謝！`;
+        
+        document.getElementById('lineLink').href = `https://line.me/R/share?text=${encodeURIComponent(message)}`;
+    }
+</script>
+
+</body>
+</html>
